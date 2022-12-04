@@ -45,11 +45,11 @@ int main()
 
     int n;
     cin>>n;
-    double a,b;
+    double number,a,b;
 
     for(int i=0; i<n; i++) //reading the input
     {
-        cin>>a>>b;
+        cin>>number>>a>>b;
         points.push_back(make_pair(a,b));
         visited.push_back(false);
     }
