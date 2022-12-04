@@ -149,9 +149,8 @@ int main()
         visited1.push_back(false);
         visited2.push_back(false);
     }
-    for(int k=0; k<5; k++)
+    for(int k=0; k<500; k++)
     {
-        cout<<solutions.size()<<endl;
         sort(solutions.begin(),solutions.end());
         cout<<k<<" "<<solutions[0].sum<<endl;
         /*for(int i=0; i<solutions[0].points.size(); i++)
@@ -173,8 +172,8 @@ int main()
         // Mutate the top solutions
         for(int i=0; i<TOP_SOLUTIONS; i++)
         {
-            int a=rand()%10+5;
-            int b=rand()%10+15;
+            int a=rand()%(n/2);
+            int b=rand()%(n/2)+(n/2);
             random_shuffle(copied_best[i].points.begin()+a, copied_best[i].points.begin()+b);
         }
 
@@ -192,47 +191,52 @@ int main()
                 child2.clear();
             }
 
-            for(int j=1; j<=n; j++) //position table
+            for(int j=0; j<n; j++) //position table
             {
                 parent1[copied_best[i].points[j]]=j;
                 parent2[copied_best[i+1].points[j]]=j;
             }
-            if(i==1000)
+            /*if(i==1000)
             {
                 cout<<"Kolejnosc rodzica 1: "<<endl;
                 for(int j=0; j<n; j++)
                 {
-                    cout<<copied_best[i].points[j]<<" ";
+                    cout<<copied_best[i].points[j]<<"\t";
                 }
                 cout<<endl;
                 cout<<"Tablica parent1: "<<endl;
-                for(int j=0; j<n; j++)
+                for(int j=1; j<=n; j++)
                 {
-                    cout<<parent1[j]<<" ";
+                    cout<<parent1[j]<<"\t";
                 }
                 cout<<endl;
                 cout<<"Kolejnosc rodzica 2: "<<endl;
                 for(int j=0; j<n; j++)
                 {
-                    cout<<copied_best[i+1].points[j]<<" ";
+                    cout<<copied_best[i+1].points[j]<<"\t";
                 }
                 cout<<endl;
                 cout<<"Tablica parent2: "<<endl;
-                for(int j=0; j<n; j++)
+                for(int j=1; j<=n; j++)
                 {
-                    cout<<parent2[j]<<" ";
+                    cout<<parent2[j]<<"\t";
                 }
                 cout<<endl;
-            }
-
+            }*/
 
             int current=n/2;
-
+            //if(i==1000)cout<<"curr: "<<current<<endl;
             while(visited1[current]==false) //find cycle
             {
                 visited1[current]=true;
-                current=parent2[current];
+                current=parent2[copied_best[i].points[current]];
+                //if(i==1000)cout<<"curr: "<<current<<endl;
             }
+            /*if(i==1000)
+            {
+                for(int j=0; j<n; j++)cout<<visited1[j]<<" ";
+                cout<<endl;
+            }*/
 
             for(int j=0; j<n; j++)
             {
