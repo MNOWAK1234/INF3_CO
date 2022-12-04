@@ -128,13 +128,6 @@ int main()
         solutions[solutions.size()-1].CalcLength();
     }
 
-    /*for(int i=0; i<25; i++)
-    {
-        for(int j=0; j<n; j++) cout<<solutions[i].points[j]<<" ";
-        cout<<endl;
-        cout<<solutions[i].sum<<endl;
-    }*/
-
     vector <int> parent1;
     vector <int> parent2;
     vector <bool> visited1;
@@ -152,12 +145,6 @@ int main()
     for(int k=0; k<500; k++)
     {
         sort(solutions.begin(),solutions.end());
-        cout<<k<<" "<<solutions[0].sum<<endl;
-        /*for(int i=0; i<solutions[0].points.size(); i++)
-        {
-            cout<<solutions[0].points[i]<<" ";
-        }
-        cout<<endl;*/
         copied_best.clear();
         for(int i=0; i<TOP_SOLUTIONS; i++)
         {
@@ -177,8 +164,7 @@ int main()
             random_shuffle(copied_best[i].points.begin()+a, copied_best[i].points.begin()+b);
         }
 
-        // Cycle cross over
-
+        // Cycle crossover
         for(int i=TOP_SOLUTIONS; i<2*TOP_SOLUTIONS; i+=2)
         {
             for(int j=0; j<=n; j++)
@@ -196,49 +182,15 @@ int main()
                 parent1[copied_best[i].points[j]]=j;
                 parent2[copied_best[i+1].points[j]]=j;
             }
-            /*if(i==1000)
-            {
-                cout<<"Kolejnosc rodzica 1: "<<endl;
-                for(int j=0; j<n; j++)
-                {
-                    cout<<copied_best[i].points[j]<<"\t";
-                }
-                cout<<endl;
-                cout<<"Tablica parent1: "<<endl;
-                for(int j=1; j<=n; j++)
-                {
-                    cout<<parent1[j]<<"\t";
-                }
-                cout<<endl;
-                cout<<"Kolejnosc rodzica 2: "<<endl;
-                for(int j=0; j<n; j++)
-                {
-                    cout<<copied_best[i+1].points[j]<<"\t";
-                }
-                cout<<endl;
-                cout<<"Tablica parent2: "<<endl;
-                for(int j=1; j<=n; j++)
-                {
-                    cout<<parent2[j]<<"\t";
-                }
-                cout<<endl;
-            }*/
 
             int current=n/2;
-            //if(i==1000)cout<<"curr: "<<current<<endl;
-            while(visited1[current]==false) //find cycle
+            while(visited1[current]==false) //find one cycle
             {
                 visited1[current]=true;
                 current=parent2[copied_best[i].points[current]];
-                //if(i==1000)cout<<"curr: "<<current<<endl;
             }
-            /*if(i==1000)
-            {
-                for(int j=0; j<n; j++)cout<<visited1[j]<<" ";
-                cout<<endl;
-            }*/
 
-            for(int j=0; j<n; j++)
+            for(int j=0; j<n; j++) //swap the cycle between children and copy the rest
             {
                 if(visited1[j]==false)
                 {
@@ -261,27 +213,7 @@ int main()
         {
             solutions[i].CalcLength();
         }
-
-        /*for(int i=0; i<solutions[0].points.size(); i++)
-        {
-            cout<<solutions[1000].points[i]<<" ";
-        }
-        cout<<endl;
-        for(int i=0; i<solutions[0].points.size(); i++)
-        {
-            cout<<solutions[1001].points[i]<<" ";
-        }
-        cout<<endl;
-        for(int i=0; i<solutions[0].points.size(); i++)
-        {
-            cout<<solutions[2000].points[i]<<" ";
-        }
-        cout<<endl;
-        for(int i=0; i<solutions[0].points.size(); i++)
-        {
-            cout<<solutions[2001].points[i]<<" ";
-        }
-        cout<<endl;*/
-
     }
+    sort(solutions.begin(),solutions.end());
+    cout<<solutions[0].sum;
 }
