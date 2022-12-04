@@ -1,6 +1,6 @@
 #include <iostream>
 #include <math.h>
-//#include <random>
+#include <random>
 #include <vector>
 #include <algorithm>
 #include <ctime>
@@ -10,6 +10,7 @@ using namespace std;
 
 const int TOP_SOLUTIONS = 1000; // How many top solutions to select
 const int POPULATION = 60000;   // Number of solutions per generation
+int n;
 
 vector <vector<double> >distances;
 struct Solution
@@ -19,11 +20,14 @@ struct Solution
     void CalcLength()
     {
         sum=0;
-        for(int i=1; i<100; i++)
+        for(int i=0; i<n-1; i++)
         {
-            sum+=distances[i][i+1];
+            sum+=distances[points[i]-1][points[i+1]-1];
+            //cout<<sum<<" "<<points[i]-1<<" "<<points[i+1]-1<<endl;
         }
-        sum+=distances[100][0];
+        sum+=distances[points[n-1]][points[0]];
+        cout<<sum<<endl;
+        //cout<<endl;
     }
     bool operator<(const Solution& a) const
     {
@@ -71,13 +75,12 @@ int main()
     vector<pair<double, double> > points;
     vector <bool> visited;
 
-    int n;
     cin>>n;
-    double a,b;
+    double number,a,b;
 
     for(int i=0; i<n; i++) //reading the input
     {
-        cin>>a>>b;
+        cin>>number>>a>>b;
         points.push_back(make_pair(a,b));
         visited.push_back(false);
     }
@@ -107,14 +110,14 @@ int main()
         //cout<<nextpoint<<"-";
     }
     sum+=distances[currentpoint][0];
-    //cout<<sum<<endl;
+    cout<<sum<<endl;
 
     // now we have a greedy solution and want to improve
 
     vector<Solution> solutions;
     vector<Solution> copied_best;
     vector<int>path;
-    for(int i=1; i<=100; i++)path.push_back(i);
+    for(int i=1; i<=n; i++)path.push_back(i);
 
     //generate random solutions
     for(int i = 0; i < POPULATION; i++)
@@ -122,10 +125,38 @@ int main()
         random_shuffle(path.begin(), path.end());//tasuje wierzcholki
         solutions.push_back(Solution{path,0});
         solutions[solutions.size()-1].CalcLength();
+            
+        for(int j=0; j<n; j++) cout<<solutions[20].points[j]<<" ";
+        cout<<endl;
+        cout<<i<<" ";
     }
-    for(int i=0; i<100; i++)
+
+    for(int i=0; i<25; i++)
+    {
+        for(int j=0; j<n; j++) cout<<solutions[i].points[j]<<" ";
+        cout<<endl;
+        cout<<solutions[i].sum<<endl;
+    }
+
+    vector <int> parent1;
+    vector <int> parent2;
+    vector <bool> visited1;
+    vector <bool> visited2;
+    vector <int> child1;
+    vector <int> child2;
+
+    for(int j=0; j<=n; j++)
+    {
+        parent1.push_back(0);
+        parent2.push_back(0);
+        visited1.push_back(false);
+        visited2.push_back(false);
+    }
+    for(int k=0; k<100; k++)
     {
         sort(solutions.begin(),solutions.end());
+        cout<<k<<" "<<solutions[0].sum<<endl;
+
         copied_best.clear();
         for(int i=0; i<TOP_SOLUTIONS; i++)
         {
@@ -137,16 +168,65 @@ int main()
         }
         solutions.clear();
 
-        // Mutate the top solutions
+        /*// Mutate the top solutions
         for(int i=0; i<TOP_SOLUTIONS; i++)
         {
             int a=rand()%10+40;
             int b=rand()%10+50;
             random_shuffle(copied_best[i].points.begin()+a, copied_best[i].points.begin()+b);
         }
-        // Cross over
-        //
-        // copy best function
-    }
+        cout<<"mutate"<<endl;*/
 
+        // Cycle cross over
+        
+        for(int i=TOP_SOLUTIONS; i<2*TOP_SOLUTIONS; i+=2)
+        {
+            for(int j=0; j<=n; j++)
+            {
+                parent1[j]=0;
+                parent2[j]=0;
+                visited1[j]=0;
+                visited2[j]=0;
+            }
+            
+            for(int j=0; j<n; j++) //position table
+            {
+                parent1[copied_best[i].points[j]]=j;
+                parent2[copied_best[i+1].points[j]]=j;
+            }
+
+            int current=n/2;
+            int next;
+
+            while(visited1[current]==false) //find cycle
+            {
+                visited1[current]=true;
+                current=parent2[current];
+            }
+
+            for(int j=0; j<n; j++)
+            {
+                if(visited1[j]==false)
+                {
+                    child1.push_back(parent1[j]);
+                    child2.push_back(parent2[j]);
+                }
+                else
+                {
+                    child1.push_back(parent2[j]);
+                    child2.push_back(parent1[j]);
+                }
+            }
+            solutions.push_back(Solution{child1,0});
+            solutions.push_back(Solution{child2,0});
+        }
+
+        // copy best function
+        for(int i=0; i<TOP_SOLUTIONS; i++) solutions.push_back(copied_best[i]);
+
+        for(int i=0; i<solutions.size(); i++)
+        {
+            solutions[i].CalcLength();
+        }
+    }
 }
