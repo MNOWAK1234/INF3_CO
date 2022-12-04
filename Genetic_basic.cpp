@@ -1,6 +1,6 @@
 #include <iostream>
 #include <math.h>
-#include <random>
+//#include <random>
 #include <vector>
 #include <algorithm>
 #include <ctime>
@@ -25,8 +25,8 @@ struct Solution
             sum+=distances[points[i]-1][points[i+1]-1];
             //cout<<sum<<" "<<points[i]-1<<" "<<points[i+1]-1<<endl;
         }
-        sum+=distances[points[n-1]][points[0]];
-        cout<<sum<<endl;
+        sum+=distances[points[n-1]-1][points[0]-1];
+        //cout<<sum<<" "<<points[n-1]-1<<" "<<points[0]-1<<endl;
         //cout<<endl;
     }
     bool operator<(const Solution& a) const
@@ -72,7 +72,7 @@ int main()
 {
     srand(time(0));
     //greedy solution
-    vector<pair<double, double> > points;
+    vector<pair<double, double> >vertexes;
     vector <bool> visited;
 
     cin>>n;
@@ -81,11 +81,12 @@ int main()
     for(int i=0; i<n; i++) //reading the input
     {
         cin>>number>>a>>b;
-        points.push_back(make_pair(a,b));
+        vertexes.push_back(make_pair(a,b));
         visited.push_back(false);
     }
 
-    distances=lss_points(points); //adjacency matrix
+    distances=lss_points(vertexes); //adjacency matrix
+    //show_matrix(distances);
 
     double sum=0;
     double minimum=double(INT_MAX);
@@ -110,7 +111,7 @@ int main()
         //cout<<nextpoint<<"-";
     }
     sum+=distances[currentpoint][0];
-    cout<<sum<<endl;
+    cout<<"greedy: "<<sum<<endl;
 
     // now we have a greedy solution and want to improve
 
@@ -125,18 +126,14 @@ int main()
         random_shuffle(path.begin(), path.end());//tasuje wierzcholki
         solutions.push_back(Solution{path,0});
         solutions[solutions.size()-1].CalcLength();
-            
-        for(int j=0; j<n; j++) cout<<solutions[20].points[j]<<" ";
-        cout<<endl;
-        cout<<i<<" ";
     }
 
-    for(int i=0; i<25; i++)
+    /*for(int i=0; i<25; i++)
     {
         for(int j=0; j<n; j++) cout<<solutions[i].points[j]<<" ";
         cout<<endl;
         cout<<solutions[i].sum<<endl;
-    }
+    }*/
 
     vector <int> parent1;
     vector <int> parent2;
@@ -152,11 +149,16 @@ int main()
         visited1.push_back(false);
         visited2.push_back(false);
     }
-    for(int k=0; k<100; k++)
+    for(int k=0; k<5; k++)
     {
+        cout<<solutions.size()<<endl;
         sort(solutions.begin(),solutions.end());
         cout<<k<<" "<<solutions[0].sum<<endl;
-
+        /*for(int i=0; i<solutions[0].points.size(); i++)
+        {
+            cout<<solutions[0].points[i]<<" ";
+        }
+        cout<<endl;*/
         copied_best.clear();
         for(int i=0; i<TOP_SOLUTIONS; i++)
         {
@@ -168,17 +170,16 @@ int main()
         }
         solutions.clear();
 
-        /*// Mutate the top solutions
+        // Mutate the top solutions
         for(int i=0; i<TOP_SOLUTIONS; i++)
         {
-            int a=rand()%10+40;
-            int b=rand()%10+50;
+            int a=rand()%10+5;
+            int b=rand()%10+15;
             random_shuffle(copied_best[i].points.begin()+a, copied_best[i].points.begin()+b);
         }
-        cout<<"mutate"<<endl;*/
 
         // Cycle cross over
-        
+
         for(int i=TOP_SOLUTIONS; i<2*TOP_SOLUTIONS; i+=2)
         {
             for(int j=0; j<=n; j++)
@@ -187,16 +188,45 @@ int main()
                 parent2[j]=0;
                 visited1[j]=0;
                 visited2[j]=0;
+                child1.clear();
+                child2.clear();
             }
-            
-            for(int j=0; j<n; j++) //position table
+
+            for(int j=1; j<=n; j++) //position table
             {
                 parent1[copied_best[i].points[j]]=j;
                 parent2[copied_best[i+1].points[j]]=j;
             }
+            if(i==1000)
+            {
+                cout<<"Kolejnosc rodzica 1: "<<endl;
+                for(int j=0; j<n; j++)
+                {
+                    cout<<copied_best[i].points[j]<<" ";
+                }
+                cout<<endl;
+                cout<<"Tablica parent1: "<<endl;
+                for(int j=0; j<n; j++)
+                {
+                    cout<<parent1[j]<<" ";
+                }
+                cout<<endl;
+                cout<<"Kolejnosc rodzica 2: "<<endl;
+                for(int j=0; j<n; j++)
+                {
+                    cout<<copied_best[i+1].points[j]<<" ";
+                }
+                cout<<endl;
+                cout<<"Tablica parent2: "<<endl;
+                for(int j=0; j<n; j++)
+                {
+                    cout<<parent2[j]<<" ";
+                }
+                cout<<endl;
+            }
+
 
             int current=n/2;
-            int next;
 
             while(visited1[current]==false) //find cycle
             {
@@ -208,13 +238,13 @@ int main()
             {
                 if(visited1[j]==false)
                 {
-                    child1.push_back(parent1[j]);
-                    child2.push_back(parent2[j]);
+                    child1.push_back(copied_best[i].points[j]);
+                    child2.push_back(copied_best[i+1].points[j]);
                 }
                 else
                 {
-                    child1.push_back(parent2[j]);
-                    child2.push_back(parent1[j]);
+                    child1.push_back(copied_best[i+1].points[j]);
+                    child2.push_back(copied_best[i].points[j]);
                 }
             }
             solutions.push_back(Solution{child1,0});
@@ -222,11 +252,32 @@ int main()
         }
 
         // copy best function
-        for(int i=0; i<TOP_SOLUTIONS; i++) solutions.push_back(copied_best[i]);
-
+        for(int i=0; i<copied_best.size(); i++) solutions.push_back(copied_best[i]);
         for(int i=0; i<solutions.size(); i++)
         {
             solutions[i].CalcLength();
         }
+
+        /*for(int i=0; i<solutions[0].points.size(); i++)
+        {
+            cout<<solutions[1000].points[i]<<" ";
+        }
+        cout<<endl;
+        for(int i=0; i<solutions[0].points.size(); i++)
+        {
+            cout<<solutions[1001].points[i]<<" ";
+        }
+        cout<<endl;
+        for(int i=0; i<solutions[0].points.size(); i++)
+        {
+            cout<<solutions[2000].points[i]<<" ";
+        }
+        cout<<endl;
+        for(int i=0; i<solutions[0].points.size(); i++)
+        {
+            cout<<solutions[2001].points[i]<<" ";
+        }
+        cout<<endl;*/
+
     }
 }
