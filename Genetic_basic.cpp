@@ -1,6 +1,6 @@
 #include <iostream>
 #include <math.h>
-//#include <random>
+#include <random>
 #include <vector>
 #include <algorithm>
 #include <ctime>
@@ -70,6 +70,10 @@ void show_matrix(vector<vector<double> >v)
 
 int main()
 {
+    ios_base::sync_with_stdio();
+    cin.tie(0);
+    cout.tie(0);
+    
     srand(time(0));
     //greedy solution
     vector<pair<double, double> >vertexes;
