@@ -1,0 +1,60 @@
+# depslib dependency file v1.0
+1670884721 source:d:\miko³aj\szko³a\studia\3sem\optymalizacja kombinatoryczna\co_project\main.cpp
+	<iostream>
+	<vector>
+	<cstdlib>
+	<time.h>
+	<queue>
+	<algorithm>
+	"manageInput.hpp"
+	"solution.hpp"
+	"initialPopulation.hpp"
+	"parameters.cpp"
+	"reproduction.hpp"
+
+1670541110 d:\miko³aj\szko³a\studia\3sem\optymalizacja kombinatoryczna\co_project\manageinput.hpp
+	<vector>
+
+1670541136 source:d:\miko³aj\szko³a\studia\3sem\optymalizacja kombinatoryczna\co_project\manageinput.cpp
+	<iostream>
+	<vector>
+	<cmath>
+	"manageInput.hpp"
+
+1670884788 source:d:\miko³aj\szko³a\studia\3sem\optymalizacja kombinatoryczna\co_project\solution.cpp
+	"solution.hpp"
+	<iostream>
+	<vector>
+	<algorithm>
+
+1670884286 d:\miko³aj\szko³a\studia\3sem\optymalizacja kombinatoryczna\co_project\solution.hpp
+	<iostream>
+	<vector>
+
+1670602202 source:d:\miko³aj\szko³a\studia\3sem\optymalizacja kombinatoryczna\co_project\initialpopulation.cpp
+	"initialPopulation.hpp"
+	<iostream>
+	<vector>
+	<climits>
+
+1670551765 d:\miko³aj\szko³a\studia\3sem\optymalizacja kombinatoryczna\co_project\initialpopulation.hpp
+	<iostream>
+	<vector>
+	"solution.hpp"
+
+1670885215 source:d:\miko³aj\szko³a\studia\3sem\optymalizacja kombinatoryczna\co_project\parameters.cpp
+
+1670885215 d:\miko³aj\szko³a\studia\3sem\optymalizacja kombinatoryczna\co_project\parameters.cpp
+
+1670872228 d:\miko³aj\szko³a\studia\3sem\optymalizacja kombinatoryczna\co_project\reproduction.hpp
+
+1670872549 source:d:\miko³aj\szko³a\studia\3sem\optymalizacja kombinatoryczna\co_project\reproduction.cpp
+	"reproduction.hpp"
+	"solution.hpp"
+	"parameters.cpp"
+	<iostream>
+	<vector>
+	<cstdlib>
+	<algorithm>
+	<queue>
+
