@@ -8,10 +8,12 @@
 
 using namespace std;
 
-#define TOP_SOLUTIONS 1000 // How many top solutions to select
-#define POPULATION 1000   // Number of solutions per generation
-#define STABLE 200
+#define TOP_SOLUTIONS 2000 // How many top solutions to select
+#define POPULATION 2000   // Number of solutions per generation
+#define STABLE 200 // Number of iterations between extinctions
 #define ALMOST_STABLE 40
+#define ITERATIONS1 2000
+#define ITERATIONS2 1000
 
 int  n;
 
@@ -318,7 +320,7 @@ int main()
     prepareCross();
     sort(solutions.begin(),solutions.end());
 
-    for(int k=0; k<4001; k++)
+    for(int k=0; k<=ITERATIONS1; k++)
     {
         if(k%200==0)
         {
@@ -330,19 +332,19 @@ int main()
         solutions.erase(solutions.begin()+POPULATION,solutions.end());
         massExtinction();
     }
-
+    cout<<endl;
     cout<<"Extinct:"<<endl; //adding best results to population
     for(int i=0; i<(int)extinct.size(); i++)
     {
         extinct[i].display();
         solutions.push_back(extinct[i]);
     }
-    cout<<endl;
+    
     //solutions.push_back(findGreedy(points));
     sort(solutions.begin(),solutions.end());
     solutions.erase(solutions.begin()+POPULATION,solutions.end());
     
-    for(int k=0; k<1001; k++)
+    for(int k=0; k<ITERATIONS2; k++)
     {
         if(k%100==0)
         {
@@ -351,7 +353,13 @@ int main()
         }
         orderCross();
         sort(solutions.begin(),solutions.end());
-        mutation();
+        //mutation();
         solutions.erase(solutions.begin()+POPULATION,solutions.end());
     }
+
+    cout<<endl;
+    cout<<"Final result"<<endl;
+    solutions[0].display();
+    vector <int> result = solutions[0].getPath();
+    for (int i=0; i<result.size(); i++) cout<<result[i]<<" - ";
 }
