@@ -8,14 +8,15 @@
 
 using namespace std;
 
-#define TOP_SOLUTIONS 100 // How many top solutions to select
-#define POPULATION 600   // Number of solutions per generation
-#define LEAVE 5
-#define STABLE 800
+#define TOP_SOLUTIONS 1000 // How many top solutions to select
+#define POPULATION 1000   // Number of solutions per generation
+#define STABLE 200
+#define ALMOST_STABLE 40
+
 int  n;
 
 vector <vector<double> >distances;
-vector<pair<double, double> > points;
+vector <pair<double, double> > points;
 vector <int> path;
 vector <int> parent1;
 vector <int> parent2;
@@ -39,7 +40,7 @@ class Solution
             this->points=points;
             this->sum=sum;
         }
-        Solution(string path)
+        Solution(string path) //do wywalenia - tylko testy
         {
             vector<int>help;
             string v="";
@@ -80,6 +81,10 @@ class Solution
         {
             cout<<sum<<endl;
         }
+        double getsum()
+        {
+            return this->sum;
+        }
         void CalcLength()
         {
             this->sum=0;
@@ -108,8 +113,8 @@ class Solution
 };
 
 vector<Solution> solutions;
-vector<Solution> copied_best;
 queue<Solution> best_of_generation;
+queue<Solution> eldest;
 vector<Solution> extinct;
 
 vector<pair<double, double> >readInput(int n)
@@ -144,50 +149,6 @@ vector<vector<double> >lss_points(vector<pair<double, double> > points)//return 
     }
     return distances;
 }
-vector<vector<double> >lss_edges(vector<vector<double> >edges)//return adjacency matrix when given edges (vertex a, vertex b, distance)
-{
-    int vertexes=(1+sqrt(8*(int)edges.size()+1))/2;//solved quadratic equation, calculates the number of vertexes and build square matrix
-    vector<double>help;
-    vector<vector<double> >distances;
-    for(int i=0; i<vertexes; i++)help.push_back(0);
-    for(int i=0; i<vertexes; i++)distances.push_back(help);//needs improvement, I don't get it how to make 2-dimensional vector using resize XD
-    for(int i=0; i<(int)edges.size(); i++)
-    {
-        distances[(int)edges[i][0]][(int)edges[i][1]]=edges[i][2];
-        distances[(int)edges[i][1]][(int)edges[i][0]]=edges[i][2];
-    }
-    return distances;
-}
-
-vector<vector<double> >make_edges(vector<pair<double, double> > points)
-{
-    vector<vector<double> >edges;
-    vector<double>one_edge;
-    for(int i=0; i<(int)points.size()-1; i++)
-    {
-        for(int j=i+1; j<(int)points.size(); j++)
-        {
-            one_edge.clear();
-            one_edge.push_back(double(i));
-            one_edge.push_back(double(j));
-            one_edge.push_back(dist(double(points[i].first),double(points[i].second),double(points[j].first),double(points[j].second)));
-            edges.push_back(one_edge);
-        }
-    }
-    return edges;
-}
-void show_matrix(vector<vector<double> >v)
-{
-    for(int i=0; i<(int)v.size(); i++)
-    {
-        for(int j=0; j<(int)v[i].size(); j++)
-        {
-            cout<<v[i][j]<<"\t";
-        }
-        cout<<endl;
-    }
-}
-
 void random()
 {
     Solution randomized(path,0);
@@ -209,82 +170,12 @@ void prepareCross()
         visited2.push_back(0);
     }
 }
-void eugenics()
-{
-    copied_best.clear();
-    for(int i=0; i<TOP_SOLUTIONS; i++)
-    {
-        copied_best.push_back(solutions[i]);
-    }
-    for(int i=0; i<TOP_SOLUTIONS; i++)
-    {
-        copied_best.push_back(solutions[i]);
-    }
-    solutions.clear();
-}
 void mutation()
 {
-    for(int i=0; i<TOP_SOLUTIONS; i++)
+    for(int i=(0.7)*TOP_SOLUTIONS; i<TOP_SOLUTIONS; i++)
     {
-        copied_best[i].mutate();
+        solutions[i].mutate();
     }
-}
-void cycleCross()
-{
-    for(int i=TOP_SOLUTIONS; i<2*TOP_SOLUTIONS; i+=2)
-    {
-        points1.clear();
-        points2.clear();
-        for(int j=0; j<=n; j++)
-        {
-            parent1[j]=0;
-            parent2[j]=0;
-            visited1[j]=0;
-            visited2[j]=0;
-            child1.clear();
-            child2.clear();
-        }
-        points1=copied_best[rand()%LEAVE+TOP_SOLUTIONS].getPath();
-        points2=copied_best[rand()%TOP_SOLUTIONS+TOP_SOLUTIONS].getPath();
-        for(int j=0; j<n; j++) //position table
-        {
-            parent1[points1[j]]=j;
-            parent2[points2[j]]=j;
-        }
-        int cycleNumber=0;
-        int current;
-        for(int j=0; j<n; j++)
-        {
-            current=j;
-            if(visited1[current]==0)cycleNumber++;
-            while(visited1[current]==0) //find cycle
-            {
-                visited1[current]=cycleNumber;
-                current=parent2[points1[current]];
-            }
-        }
-        for(int j=0; j<n; j++)
-        {
-            if(visited1[j]%2==1)
-            {
-                child1.push_back(points1[j]);
-                child2.push_back(points2[j]);
-            }
-            else
-            {
-                child1.push_back(points2[j]);
-                child2.push_back(points1[j]);
-            }
-        }
-        Solution crossed1(child1,0);
-        Solution crossed2(child2,0);
-        solutions.push_back(crossed1);
-        solutions.push_back(crossed2);
-    }
-}
-void partiallyMappedCross()
-{
-    ;
 }
 void insertSegment(int startVertex, int endVertex)//helps with orderCross
 {
@@ -309,7 +200,7 @@ void insertSegment(int startVertex, int endVertex)//helps with orderCross
 }
 void orderCross()
 {
-    for(int i=TOP_SOLUTIONS; i<2*TOP_SOLUTIONS; i+=2)
+    for(int i=0; i<TOP_SOLUTIONS; i++)
     {
         points1.clear();
         points2.clear();
@@ -322,8 +213,8 @@ void orderCross()
             child1.clear();
             child2.clear();
         }
-        points1=copied_best[rand()%LEAVE+TOP_SOLUTIONS].getPath();
-        points2=copied_best[rand()%TOP_SOLUTIONS+TOP_SOLUTIONS].getPath();
+        points1=solutions[rand()%TOP_SOLUTIONS].getPath();
+        points2=solutions[rand()%TOP_SOLUTIONS].getPath();
         for(int j=0; j<n; j++) //position table
         {
             parent1[points1[j]]=j;
@@ -341,34 +232,44 @@ void orderCross()
         insertSegment(a,b);
         Solution crossed1(child1,0);
         Solution crossed2(child2,0);
+        crossed1.CalcLength();
+        crossed2.CalcLength();
         solutions.push_back(crossed1);
         solutions.push_back(crossed2);
     }
 }
-void endBreed()
-{
-    for(int i=0; i<(int)copied_best.size(); i++)
-    {
-        solutions.push_back(copied_best[i]);
-    }
-    for(int i=0; i<(int)solutions.size(); i++)
-    {
-        solutions[i].CalcLength();
-    }
-    sort(solutions.begin(),solutions.end());
-}
 void massExtinction()
 {
+    vector <int> tmp;
+    Solution help(tmp,0);
+
     best_of_generation.push(solutions[0]);
+    if(eldest.size()<ALMOST_STABLE)
+    {
+        help=best_of_generation.front();
+        best_of_generation.pop();
+        eldest.push(help);
+    }
     if(best_of_generation.size()==STABLE)
     {
-        if(solutions[0]==best_of_generation.front())
+        if(abs(solutions[0].getsum()-best_of_generation.front().getsum())<40)
+        {
+            mutation();
+        }
+        if(abs(solutions[0].getsum()-eldest.front().getsum())<40)
         {
             extinct.push_back(solutions[0]);
             solutions.clear();
+            random();
             best_of_generation=queue<Solution>();//clears the queue
         }
-        else best_of_generation.pop();
+        else
+        {
+            eldest.pop();
+            help=best_of_generation.front();
+            best_of_generation.pop();
+            eldest.push(help);
+        }
     }
 }
 
@@ -411,79 +312,46 @@ int main()
     cin>>n;
     points=readInput(n);
     distances=lss_points(points); //adjacency matrix
-    //solutions.push_back(findGreedy(points));
-    //cout<<"greedy:"<<endl;
-    //solutions[0].display();
-    //cin>>found_earlier;
-    //solutions.push_back(Solution(found_earlier));
+    
     for(int i=1; i<=n; i++)path.push_back(i);
     random();
     prepareCross();
     sort(solutions.begin(),solutions.end());
-    vector<int>help;
-    for(int k=0; k<4000; k++)
+
+    for(int k=0; k<4001; k++)
     {
-        if(k%500==0)
+        if(k%200==0)
         {
             cout<<k<<endl;
             solutions[0].display();
         }
-        copied_best.clear();
-        eugenics();
-        mutation();
-        cycleCross();
-        //partiallyMappedCross();
         orderCross();
-        endBreed();
+        sort(solutions.begin(),solutions.end());
+        solutions.erase(solutions.begin()+POPULATION,solutions.end());
         massExtinction();
-        random();
     }
-    solutions.clear();
-    cout<<"Extinct:"<<endl;
+
+    cout<<"Extinct:"<<endl; //adding best results to population
     for(int i=0; i<(int)extinct.size(); i++)
     {
         extinct[i].display();
         solutions.push_back(extinct[i]);
     }
-    random();
-    for(int k=0; k<1000; k++)
+    cout<<endl;
+    //solutions.push_back(findGreedy(points));
+    sort(solutions.begin(),solutions.end());
+    solutions.erase(solutions.begin()+POPULATION,solutions.end());
+    
+    for(int k=0; k<1001; k++)
     {
         if(k%100==0)
         {
             cout<<k<<endl;
             solutions[0].display();
         }
-        copied_best.clear();
-        eugenics();
-        mutation();
-        cycleCross();
-        //partiallyMappedCross();
         orderCross();
-        endBreed();
-        random();
-    }
-    cout<<"New:"<<endl;
-    solutions[0].display();
-    solutions.clear();
-    solutions.push_back(findGreedy(points));
-    cout<<"greedy:"<<endl;
-    solutions[0].display();
-    for(int k=0; k<4000; k++)
-    {
-        if(k%100==0)
-        {
-            cout<<k<<endl;
-            solutions[0].display();
-        }
-        copied_best.clear();
-        eugenics();
+        sort(solutions.begin(),solutions.end());
         mutation();
-        cycleCross();
-        //partiallyMappedCross();
-        orderCross();
-        endBreed();
-        random();
+        solutions.erase(solutions.begin()+POPULATION,solutions.end());
     }
-    cout<<"After greedy:"<<endl;
-    solutions[0].display();
 }
