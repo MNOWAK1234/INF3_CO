@@ -13,7 +13,7 @@ using namespace std;
 #define BEST 5000
 #define STABLE 200
 #define ALMOST_STABLE 40
-#define CLOSE 800
+#define CLOSE 1600
 #define NEIGHBOURS 4
 
 int  n;
@@ -386,15 +386,20 @@ void findclusters()
     for(int i=0; i<n; i++) visited1.push_back(0);
     
     int licznik=0;
+    vector <int> tmp;
     
     for(int i=0; i<n; i++)
     {
         if(densepointsid[i]==1 && visited1[i]==0)
         {
+            cout<<i<<endl;
             visited1[i]=1;
+            tmp.clear();
+            clusters.push_back(tmp);
+
             dfs(i,licznik);
+            licznik++;
         }
-        licznik++;
     }
 }
 
@@ -409,10 +414,10 @@ int main()
     distances=lss_points(coordinates); //adjacency matrix
     cout<<"here2"<<endl;
 
-    for(int i=0; i<n; i++)
+    /*for(int i=0; i<n; i++)
     {
         cout<<i<<" "<<densepointsid[i]<<endl;
-    }
+    }*/
 
     /*cout<<densepointsid.size()<<endl;
     for(int i=0; i<densepointsid.size(); i++)
