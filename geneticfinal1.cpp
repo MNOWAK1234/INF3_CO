@@ -25,6 +25,7 @@ vector <int> visited1;
 vector <int> visited2;
 vector <int> child1;
 vector <int> child2;
+vector <int> cs;
 vector <int> densepointsid;
 vector <vector <int> > V;
 vector <vector <int> > clusters;
@@ -74,12 +75,12 @@ class Solution
         void display()
         {
             cout<<sum<<endl;
-            for(int i=0; i<n; i++)
+            /*for(int i=0; i<n; i++)
             {
                 if(i%10==0)cout<<this->points[i]<<"\tx: "<<coordinates[this->points[i]-1].first<<"\ty: "<<coordinates[this->points[i]-1].second<<endl;
-            }
+            }*/
             //cout<<points[0]<<endl;
-            cout<<endl;
+            //cout<<endl;
         }
         double getsum()
         {
@@ -174,10 +175,32 @@ vector<vector<double> >lss_points(vector<pair<double, double> > points)//return 
 }
 void random()
 {
-    for(int i = 0; i < POPULATION; i++)
+    vector<int>better;
+    for(int i = 0; i < POPULATION/10; i++)
     {
         random_shuffle(path.begin(), path.end());//tasuje wierzcholki
         Solution randomized(path,0);
+        randomized.CalcLength();
+        solutions.push_back(randomized);
+    }
+    for(int i=POPULATION/10; i<POPULATION; i++)
+    {
+        better.clear();
+        random_shuffle(cs.begin(), cs.end());
+        for(int j=0; j<(int)clusters.size(); j++)
+        {
+            random_shuffle(clusters[j].begin(), clusters[j].end());
+        }
+        for(int j=0; j<(int)cs.size(); j++)
+        {
+            better.insert(better.end(), clusters[cs[j]].begin(), clusters[cs[j]].end());
+        }
+        for(int j=0; j<clusters[clusters.size()-1].size(); j++)
+        {
+            int pos=rand()%better.size();
+            better.insert(better.begin()+pos, clusters[clusters.size()-1][j]);
+        }
+        Solution randomized(better,0);
         randomized.CalcLength();
         solutions.push_back(randomized);
     }
@@ -370,7 +393,7 @@ void dfs(int current, int clusternumber)
     {
         if(!visited1[V[current][i]])
         {
-            clusters[clusternumber].push_back(V[current][i]);
+            clusters[clusternumber].push_back(V[current][i]+1);
             visited1[V[current][i]]=1;
             if(densepointsid[V[current][i]]==1)
             {
@@ -384,22 +407,28 @@ void findclusters()
 {
     visited1.clear();
     for(int i=0; i<n; i++) visited1.push_back(0);
-    
+
     int licznik=0;
     vector <int> tmp;
-    
+
     for(int i=0; i<n; i++)
     {
         if(densepointsid[i]==1 && visited1[i]==0)
         {
-            cout<<i<<endl;
             visited1[i]=1;
             tmp.clear();
+            tmp.push_back(i+1);
             clusters.push_back(tmp);
 
             dfs(i,licznik);
             licznik++;
         }
+    }
+    tmp.clear();
+    clusters.push_back(tmp);
+    for(int i=0; i<n; i++)
+    {
+        if(visited1[i]==0)clusters[licznik].push_back(i+1);
     }
 }
 
@@ -410,39 +439,19 @@ int main()
     srand(time(0));
     cin>>n;
     coordinates=readInput(n);
-    cout<<"here"<<endl;
     distances=lss_points(coordinates); //adjacency matrix
-    cout<<"here2"<<endl;
 
     /*for(int i=0; i<n; i++)
     {
-        cout<<i<<" "<<densepointsid[i]<<endl;
-    }*/
-
-    /*cout<<densepointsid.size()<<endl;
-    for(int i=0; i<densepointsid.size(); i++)
-    {
-        cout<<densepointsid[i]<<" ";
-    }
-    cout<<endl;
-
-    for(int i=0; i<V.size(); i++)
-    {
-        cout<<i<<": ";
+        cout<<i<<" "<<densepointsid[i]<<" ";
         for(int j=0; j<V[i].size(); j++) cout<<V[i][j]<<" ";
         cout<<endl;
     }*/
 
     //clustering
     findclusters();
-    for(int i=0; i<clusters.size(); i++)
-    {
-        cout<<i<<": ";
-        for(int j=0; j<clusters[i].size(); j++) cout<<clusters[i][j]<<" ";
-        cout<<endl;
-    }
-
-    /*for(int i=1; i<=n; i++)path.push_back(i);
+    for(int i=0; i<(int)clusters.size()-1; i++)cs.push_back(i);
+    for(int i=1; i<=n; i++)path.push_back(i);
     random();
     prepareCross();
     sort(solutions.begin(),solutions.end());
@@ -481,5 +490,5 @@ int main()
         sort(solutions.begin(),solutions.end());
         mutation();
         solutions.erase(solutions.begin()+POPULATION,solutions.end());
-    }*/
+    }
 }
