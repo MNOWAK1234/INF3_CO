@@ -27,6 +27,7 @@ vector <int> child1;
 vector <int> child2;
 vector <int> densepointsid;
 vector <vector <int> > V;
+vector <vector <int> > clusters;
 
 string found_earlier;
 int parent1,parent2;
@@ -139,14 +140,24 @@ vector<vector<double> >lss_points(vector<pair<double, double> > points)//return 
     vector<double>one_vertex;
     double distance;
     int cnt;
+
+    vector <int> tmp;
+    for(int i=0; i<(int)points.size(); i++)
+    {
+        tmp.clear();
+        V.push_back(tmp);
+        densepointsid.push_back(0);
+    }
     for(int i=0; i<(int)points.size(); i++)
     {
         one_vertex.clear();
         cnt=0;
+
         for(int j=0; j<(int)points.size(); j++)
         {
             distance=dist(points[i].first,points[i].second,points[j].first,points[j].second);
             one_vertex.push_back(distance);
+
             if(distance<=CLOSE && i!=j)
             {
                 V[i].push_back(j);
@@ -155,7 +166,7 @@ vector<vector<double> >lss_points(vector<pair<double, double> > points)//return 
         }
         if(cnt>=NEIGHBOURS)
         {
-            densepointsid.push_back(i);
+            densepointsid[i]=1;
         }
         distances.push_back(one_vertex);
     }
@@ -353,6 +364,40 @@ Solution findGreedy(vector<pair<double, double> > vertexes)
     return res;
 }
 
+void dfs(int current, int clusternumber)
+{
+    for(int i=0; i<V[current].size(); i++)
+    {
+        if(!visited1[V[current][i]])
+        {
+            clusters[clusternumber].push_back(V[current][i]);
+            visited1[V[current][i]]=1;
+            if(densepointsid[V[current][i]]==1)
+            {
+                dfs(V[current][i],clusternumber);
+            }
+        }
+    }
+}
+
+void findclusters()
+{
+    visited1.clear();
+    for(int i=0; i<n; i++) visited1.push_back(0);
+    
+    int licznik=0;
+    
+    for(int i=0; i<n; i++)
+    {
+        if(densepointsid[i]==1 && visited1[i]==0)
+        {
+            visited1[i]=1;
+            dfs(i,licznik);
+        }
+        licznik++;
+    }
+}
+
 int main()
 {
     ios_base::sync_with_stdio(0);
@@ -360,9 +405,39 @@ int main()
     srand(time(0));
     cin>>n;
     coordinates=readInput(n);
-
+    cout<<"here"<<endl;
     distances=lss_points(coordinates); //adjacency matrix
-    for(int i=1; i<=n; i++)path.push_back(i);
+    cout<<"here2"<<endl;
+
+    for(int i=0; i<n; i++)
+    {
+        cout<<i<<" "<<densepointsid[i]<<endl;
+    }
+
+    /*cout<<densepointsid.size()<<endl;
+    for(int i=0; i<densepointsid.size(); i++)
+    {
+        cout<<densepointsid[i]<<" ";
+    }
+    cout<<endl;
+
+    for(int i=0; i<V.size(); i++)
+    {
+        cout<<i<<": ";
+        for(int j=0; j<V[i].size(); j++) cout<<V[i][j]<<" ";
+        cout<<endl;
+    }*/
+
+    //clustering
+    findclusters();
+    for(int i=0; i<clusters.size(); i++)
+    {
+        cout<<i<<": ";
+        for(int j=0; j<clusters[i].size(); j++) cout<<clusters[i][j]<<" ";
+        cout<<endl;
+    }
+
+    /*for(int i=1; i<=n; i++)path.push_back(i);
     random();
     prepareCross();
     sort(solutions.begin(),solutions.end());
@@ -401,5 +476,5 @@ int main()
         sort(solutions.begin(),solutions.end());
         mutation();
         solutions.erase(solutions.begin()+POPULATION,solutions.end());
-    }
+    }*/
 }
