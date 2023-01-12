@@ -8,13 +8,13 @@
 
 using namespace std;
 
-#define CROSSES 10000
-#define POPULATION 10000
-#define BEST 10000
+#define CROSSES 1000
+#define POPULATION 5000
+#define BEST 5000
 #define STABLE 200
 #define ALMOST_STABLE 40
-#define ITERATIONS1 4000
-#define ITERATIONS2 1000
+#define CLOSE 800
+#define NEIGHBOURS 4
 
 int  n;
 
@@ -27,7 +27,6 @@ vector <int> child1;
 vector <int> child2;
 vector <int> densepointsid;
 vector <vector <int> > V;
-vector <vector <int> > clusters;
 
 string found_earlier;
 int parent1,parent2;
@@ -74,12 +73,12 @@ class Solution
         void display()
         {
             cout<<sum<<endl;
-            /*for(int i=0; i<n; i++)
+            for(int i=0; i<n; i++)
             {
                 if(i%10==0)cout<<this->points[i]<<"\tx: "<<coordinates[this->points[i]-1].first<<"\ty: "<<coordinates[this->points[i]-1].second<<endl;
             }
             //cout<<points[0]<<endl;
-            cout<<endl;*/
+            cout<<endl;
         }
         double getsum()
         {
@@ -138,12 +137,25 @@ vector<vector<double> >lss_points(vector<pair<double, double> > points)//return 
 {
     vector<vector<double> >distances;
     vector<double>one_vertex;
+    double distance;
+    int cnt;
     for(int i=0; i<(int)points.size(); i++)
     {
         one_vertex.clear();
+        cnt=0;
         for(int j=0; j<(int)points.size(); j++)
         {
-            one_vertex.push_back(dist(points[i].first,points[i].second,points[j].first,points[j].second));
+            distance=dist(points[i].first,points[i].second,points[j].first,points[j].second);
+            one_vertex.push_back(distance);
+            if(distance<=CLOSE && i!=j)
+            {
+                V[i].push_back(j);
+                cnt++;
+            }
+        }
+        if(cnt>=NEIGHBOURS)
+        {
+            densepointsid.push_back(i);
         }
         distances.push_back(one_vertex);
     }
@@ -289,11 +301,11 @@ void massExtinction()
     }
     if(best_of_generation.size()==STABLE)
     {
-        /*if(abs(solutions[0].getsum()-best_of_generation.front().getsum())<400)
+        if(abs(solutions[0].getsum()-best_of_generation.front().getsum())<40)
         {
             mutation();
-        }*/
-        if(abs(solutions[0].getsum()-eldest.front().getsum())<400)
+        }
+        if(abs(solutions[0].getsum()-eldest.front().getsum())<40)
         {
             extinct.push_back(solutions[0]);
             solutions.clear();
@@ -341,32 +353,6 @@ Solution findGreedy(vector<pair<double, double> > vertexes)
     return res;
 }
 
-void dfs(int current, int clusternumber)
-{
-    visited1[current]=1;
-    for(int i=0; i<V[current].size(); i++)
-    {
-        if(!visited1[V[current][i]])
-        {
-            clusters[clusternumber].push_back(V[current][i]);
-            dfs(V[current][i],clusternumber);
-        }
-    }
-}
-
-void findclusters()
-{
-    visited1.clear();
-    for(int i=0; i<n; i++) visited1.push_back(0);
-    
-    int licznik=0;
-    for(int i=0; i<densepointsid.size(); i++)
-    {
-        if(!visited1[i]) dfs(i,licznik);
-        licznik++;
-    }
-}
-
 int main()
 {
     ios_base::sync_with_stdio(0);
@@ -374,14 +360,14 @@ int main()
     srand(time(0));
     cin>>n;
     coordinates=readInput(n);
-    distances=lss_points(coordinates); //adjacency matrix
 
+    distances=lss_points(coordinates); //adjacency matrix
     for(int i=1; i<=n; i++)path.push_back(i);
     random();
     prepareCross();
     sort(solutions.begin(),solutions.end());
 
-    for(int k=0; k<=ITERATIONS1; k++)
+    for(int k=0; k<4001; k++)
     {
         if(k%100==0)
         {
@@ -404,7 +390,7 @@ int main()
     sort(solutions.begin(),solutions.end());
     solutions.erase(solutions.begin()+POPULATION,solutions.end());
 
-    for(int k=0; k<=ITERATIONS2; k++)
+    for(int k=0; k<1001; k++)
     {
         if(k%100==0)
         {
