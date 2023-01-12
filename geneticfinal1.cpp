@@ -8,35 +8,36 @@
 
 using namespace std;
 
-#define TOP_SOLUTIONS 1000 // How many top solutions to select
-#define POPULATION 1000   // Number of solutions per generation
-#define STABLE 500 // Number of iterations between extinctions
+#define CROSSES 10000
+#define POPULATION 10000
+#define BEST 10000
+#define STABLE 200
 #define ALMOST_STABLE 40
-#define ITERATIONS1 1000
-#define ITERATIONS2 3000
+#define ITERATIONS1 4000
+#define ITERATIONS2 1000
 
 int  n;
 
 vector <vector<double> >distances;
-vector <pair<double, double> > points;
+vector <pair<double, double> > coordinates;
 vector <int> path;
-vector <int> parent1;
-vector <int> parent2;
 vector <int> visited1;
 vector <int> visited2;
 vector <int> child1;
 vector <int> child2;
-vector <int> points1;
-vector <int> points2;
+vector <int> densepointsid;
+vector <vector <int> > V;
+vector <vector <int> > clusters;
 
 string found_earlier;
+int parent1,parent2;
 
 class Solution
 {
-    private:
+    public:
         vector<int>points;
         double sum;
-    public:
+
         Solution(vector<int>points, double sum)
         {
             this->points=points;
@@ -59,14 +60,9 @@ class Solution
                 {
                     v+=path[i];
                 }
-            }   
+            }
             this->points=help;
             this->sum=0;
-        }
-        void differentSolution(vector<int>points, double sum)
-        {
-            this->points=points;
-            this->sum=sum;
         }
         void mutate()
         {
@@ -75,13 +71,15 @@ class Solution
             if(b<a)swap(a,b);
             random_shuffle(this->points.begin()+a, this->points.begin()+b);
         }
-        vector<int> getPath()
-        {
-            return this->points;
-        }
         void display()
         {
             cout<<sum<<endl;
+            /*for(int i=0; i<n; i++)
+            {
+                if(i%10==0)cout<<this->points[i]<<"\tx: "<<coordinates[this->points[i]-1].first<<"\ty: "<<coordinates[this->points[i]-1].second<<endl;
+            }
+            //cout<<points[0]<<endl;
+            cout<<endl;*/
         }
         double getsum()
         {
@@ -153,11 +151,10 @@ vector<vector<double> >lss_points(vector<pair<double, double> > points)//return 
 }
 void random()
 {
-    Solution randomized(path,0);
     for(int i = 0; i < POPULATION; i++)
     {
         random_shuffle(path.begin(), path.end());//tasuje wierzcholki
-        randomized.differentSolution(path,0);
+        Solution randomized(path,0);
         randomized.CalcLength();
         solutions.push_back(randomized);
     }
@@ -166,72 +163,110 @@ void prepareCross()
 {
     for(int j=0; j<=n; j++)
     {
-        parent1.push_back(0);
-        parent2.push_back(0);
         visited1.push_back(0);
         visited2.push_back(0);
     }
 }
 void mutation()
 {
-    for(int i=(0.7)*TOP_SOLUTIONS; i<TOP_SOLUTIONS; i++)
+    for(int i=(0.7)*POPULATION; i<POPULATION; i++)
     {
         solutions[i].mutate();
     }
 }
-void insertSegment(int startVertex, int endVertex)//helps with orderCross
-{
-    if((int)child1.size()==startVertex)
-    {
-        int copyIndex=startVertex;
-        while(copyIndex<=endVertex)
-        {
-            child1.push_back(points1[copyIndex]);
-            copyIndex++;
-        }
-    }
-    if((int)child2.size()==startVertex)
-    {
-        int copyIndex=startVertex;
-        while(copyIndex<=endVertex)
-        {
-            child2.push_back(points2[copyIndex]);
-            copyIndex++;
-        }
-    }
-}
+
 void orderCross()
 {
-    for(int i=0; i<TOP_SOLUTIONS; i++)
+    for(int i=0; i<CROSSES; i++)
     {
-        points1.clear();
-        points2.clear();
+        parent1=rand()%BEST;
+        parent2=rand()%POPULATION;
+        child1.clear();
+        child2.clear();
         for(int j=0; j<=n; j++)
         {
-            parent1[j]=0;
-            parent2[j]=0;
             visited1[j]=0;
             visited2[j]=0;
-            child1.clear();
-            child2.clear();
-        }
-        points1=solutions[rand()%TOP_SOLUTIONS].getPath();
-        points2=solutions[rand()%TOP_SOLUTIONS].getPath();
-        for(int j=0; j<n; j++) //position table
-        {
-            parent1[points1[j]]=j;
-            parent2[points2[j]]=j;
         }
         int a=rand()%n;
         int b=rand()%n;
-        if(b<a)swap(a,b);
-        for(int j=0; j<n; j++)
+        //int b=(a+rand()%20)%n;
+        int index=a;
+        while(index!=b)
         {
-            insertSegment(a,b);
-            if(parent1[points2[j]]<a || parent1[points2[j]]>b)child1.push_back(points2[j]);
-            if(parent2[points1[j]]<a || parent2[points1[j]]>b)child2.push_back(points1[j]);
+            visited1[solutions[parent1].points[index]]=1;
+            visited2[solutions[parent2].points[index]]=1;
+            index=(index+1)%n;
         }
-        insertSegment(a,b);
+        visited1[solutions[parent1].points[index]]=1;
+        visited2[solutions[parent2].points[index]]=1;
+        if(a<=b)
+        {
+            index=0;
+            while(child1.size()<a)
+            {
+                if(visited1[solutions[parent2].points[index]]==0)
+                {
+                    child1.push_back(solutions[parent2].points[index]);
+                }
+                index++;
+            }
+            for(int j=a; j<=b; j++)
+            {
+                child1.push_back(solutions[parent1].points[j]);
+            }
+            for(int j=index; j<n; j++)
+            {
+                if(visited1[solutions[parent2].points[j]]==0)
+                {
+                    child1.push_back(solutions[parent2].points[j]);
+                }
+            }
+            index=0;
+            while(child2.size()<a)
+            {
+                if(visited2[solutions[parent1].points[index]]==0)
+                {
+                    child2.push_back(solutions[parent1].points[index]);
+                }
+                index++;
+            }
+            for(int j=a; j<=b; j++)
+            {
+                child2.push_back(solutions[parent2].points[j]);
+            }
+            for(int j=index; j<n; j++)
+            {
+                if(visited2[solutions[parent1].points[j]]==0)
+                {
+                    child2.push_back(solutions[parent1].points[j]);
+                }
+            }
+        }
+        else
+        {
+            for(int j=0; j<=b; j++)
+            {
+                child1.push_back(solutions[parent1].points[j]);
+                child2.push_back(solutions[parent2].points[j]);
+            }
+            for(int j=0; j<n; j++)
+            {
+                if(visited1[solutions[parent2].points[j]]==0)
+                {
+                    child1.push_back(solutions[parent2].points[j]);
+                }
+                if(visited2[solutions[parent1].points[j]]==0)
+                {
+                    child2.push_back(solutions[parent1].points[j]);
+                }
+            }
+            for(int j=a; j<n; j++)
+            {
+                child1.push_back(solutions[parent1].points[j]);
+                child2.push_back(solutions[parent2].points[j]);
+            }
+        }
         Solution crossed1(child1,0);
         Solution crossed2(child2,0);
         crossed1.CalcLength();
@@ -254,11 +289,11 @@ void massExtinction()
     }
     if(best_of_generation.size()==STABLE)
     {
-        if(abs(solutions[0].getsum()-best_of_generation.front().getsum())<40)
+        /*if(abs(solutions[0].getsum()-best_of_generation.front().getsum())<400)
         {
             mutation();
-        }
-        if(abs(solutions[0].getsum()-eldest.front().getsum())<40)
+        }*/
+        if(abs(solutions[0].getsum()-eldest.front().getsum())<400)
         {
             extinct.push_back(solutions[0]);
             solutions.clear();
@@ -306,24 +341,49 @@ Solution findGreedy(vector<pair<double, double> > vertexes)
     return res;
 }
 
+void dfs(int current, int clusternumber)
+{
+    visited1[current]=1;
+    for(int i=0; i<V[current].size(); i++)
+    {
+        if(!visited1[V[current][i]])
+        {
+            clusters[clusternumber].push_back(V[current][i]);
+            dfs(V[current][i],clusternumber);
+        }
+    }
+}
+
+void findclusters()
+{
+    visited1.clear();
+    for(int i=0; i<n; i++) visited1.push_back(0);
+    
+    int licznik=0;
+    for(int i=0; i<densepointsid.size(); i++)
+    {
+        if(!visited1[i]) dfs(i,licznik);
+        licznik++;
+    }
+}
+
 int main()
 {
     ios_base::sync_with_stdio(0);
     cin.tie(0);
     srand(time(0));
     cin>>n;
-    points=readInput(n);
-    distances=lss_points(points); //adjacency matrix
-    
+    coordinates=readInput(n);
+    distances=lss_points(coordinates); //adjacency matrix
+
     for(int i=1; i<=n; i++)path.push_back(i);
     random();
     prepareCross();
-    solutions.push_back(findGreedy(points));
     sort(solutions.begin(),solutions.end());
 
     for(int k=0; k<=ITERATIONS1; k++)
     {
-        if(k%200==0)
+        if(k%100==0)
         {
             cout<<k<<endl;
             solutions[0].display();
@@ -333,19 +393,18 @@ int main()
         solutions.erase(solutions.begin()+POPULATION,solutions.end());
         massExtinction();
     }
-    cout<<endl;
+
     cout<<"Extinct:"<<endl; //adding best results to population
     for(int i=0; i<(int)extinct.size(); i++)
     {
         extinct[i].display();
         solutions.push_back(extinct[i]);
     }
-    
     //solutions.push_back(findGreedy(points));
     sort(solutions.begin(),solutions.end());
     solutions.erase(solutions.begin()+POPULATION,solutions.end());
-    
-    for(int k=0; k<ITERATIONS2; k++)
+
+    for(int k=0; k<=ITERATIONS2; k++)
     {
         if(k%100==0)
         {
@@ -357,10 +416,4 @@ int main()
         mutation();
         solutions.erase(solutions.begin()+POPULATION,solutions.end());
     }
-
-    cout<<endl;
-    cout<<"Final result"<<endl;
-    solutions[0].display();
-    vector <int> result = solutions[0].getPath();
-    for (int i=0; i<result.size(); i++) cout<<result[i]<<" - ";
 }
