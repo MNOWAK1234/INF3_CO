@@ -8,12 +8,12 @@
 
 using namespace std;
 
-#define TOP_SOLUTIONS 1000 // How many top solutions to select
-#define POPULATION 1000   // Number of solutions per generation
+#define TOP_SOLUTIONS 5000 // How many top solutions to select
+#define POPULATION 5000   // Number of solutions per generation
 #define STABLE 500 // Number of iterations between extinctions
 #define ALMOST_STABLE 40
-#define ITERATIONS1 1000
-#define ITERATIONS2 3000
+#define ITERATIONS1 5000
+#define ITERATIONS2 1000
 
 int  n;
 
@@ -74,6 +74,26 @@ class Solution
             int b=rand()%n;
             if(b<a)swap(a,b);
             random_shuffle(this->points.begin()+a, this->points.begin()+b);
+        }
+        void mutate1()
+        {
+            int a=rand()%n;
+            int b=rand()%n;
+            swap(points[a],points[b]);
+        }
+        void mutate2()
+        {
+            int a=rand()%n;
+            int b=rand()%n;
+            if(b<a)swap(a,b);
+            vector <int> tmp;
+            for(int i=a; i<=b; i++) tmp.push_back(points[i]);
+            int j=0;
+            for(int i=b; i>=a; i--)
+            {
+                points[i]=tmp[j];
+                j++;
+            }
         }
         vector<int> getPath()
         {
@@ -174,9 +194,9 @@ void prepareCross()
 }
 void mutation()
 {
-    for(int i=(0.7)*TOP_SOLUTIONS; i<TOP_SOLUTIONS; i++)
+    for(int i=TOP_SOLUTIONS*0.7; i<TOP_SOLUTIONS; i++)
     {
-        solutions[i].mutate();
+        solutions[i].mutate1();
     }
 }
 void insertSegment(int startVertex, int endVertex)//helps with orderCross
@@ -254,7 +274,7 @@ void massExtinction()
     }
     if(best_of_generation.size()==STABLE)
     {
-        if(abs(solutions[0].getsum()-best_of_generation.front().getsum())<40)
+        if(abs(solutions[0].getsum()-best_of_generation.front().getsum())<1000)
         {
             mutation();
         }
@@ -318,7 +338,7 @@ int main()
     for(int i=1; i<=n; i++)path.push_back(i);
     random();
     prepareCross();
-    solutions.push_back(findGreedy(points));
+    //solutions.push_back(findGreedy(points));
     sort(solutions.begin(),solutions.end());
 
     for(int k=0; k<=ITERATIONS1; k++)
@@ -329,6 +349,7 @@ int main()
             solutions[0].display();
         }
         orderCross();
+        //mutation();
         sort(solutions.begin(),solutions.end());
         solutions.erase(solutions.begin()+POPULATION,solutions.end());
         massExtinction();
