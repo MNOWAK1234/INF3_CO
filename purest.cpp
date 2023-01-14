@@ -12,9 +12,7 @@ using namespace std;
 #define CROSSES 2500
 #define POPULATION 5000
 #define BEST 5000
-#define STABLE 200
-#define CLOSE 1600
-#define NEIGHBOURS 3
+#define STABLE 400
 #define ITERATIONS1 4001
 #define ITERATIONS2 1001
 
@@ -99,7 +97,7 @@ class Solution
 };
 
 vector<Solution> solutions;
-queue<Solution> best_of_generation;
+queue <Solution> best_of_generation;
 vector<Solution> extinct;
 
 vector<pair<double, double> >readInput(int n)
@@ -138,13 +136,73 @@ vector<vector<double> >lss_points(vector<pair<double, double> > points)//return 
 }
 void random()
 {
-    vector<int>better;
-    for(int i = 0; i < POPULATION; i++)
+    for(int i = 0; i < POPULATION-100; i++)
     {
         random_shuffle(path.begin(), path.end());//tasuje wierzcholki
         Solution randomized(path,0);
         randomized.CalcLength();
         solutions.push_back(randomized);
+    }
+}
+
+int distribution(int siz)
+{
+    double pool = (float)rand()/(float)(RAND_MAX+1);//0-1
+    pool*=pow(pool,siz/3);
+    pool*=siz;
+    return (int)pool;
+
+}
+
+void random2()
+{
+    vector<double>evaluate;
+    vector<bool>visited;
+    vector<pair<double, int> > valueandindex;
+    vector<int>route;
+    for(int j=0; j<n; j++)
+    {
+        visited.push_back(false);
+        double sumofdist=0;
+        for(int k=0; k<n; k++)sumofdist+=distances[j][k];
+        evaluate.push_back(sumofdist);
+    }
+    //for(int i=0; i<n; i++)cout<<i+1<<": "<<evaluate[i]<<endl;
+    for(int i = 0; i < 100; i++)//POPULATION
+    {
+        //if(i%50==0)cout<<i<<endl;
+        int d=0;
+        for(int j=0; j<n; j++)visited[j]=false;
+        int current=rand()%n;
+        visited[current]=true;
+        route.clear();
+        route.push_back(current+1);
+        for(int j=1; j<n; j++)//EVERY STEP
+        {
+            //cout<<j<<" "<<current+1<<endl;
+            valueandindex.clear();
+            for(int k=0; k<n; k++)
+            {
+                if(visited[k]==false)
+                {
+                    valueandindex.push_back(make_pair(distances[current][k], k));
+                }
+            }
+            sort(valueandindex.begin(), valueandindex.end());
+            int index=distribution(valueandindex.size());
+            if(index>10)d++;
+            current=valueandindex[index].second;
+            route.push_back(current+1);
+            visited[current]=true;
+            for(int k=0; k<n; k++)
+            {
+                evaluate[k]-=distances[k][current];
+            }
+        }
+        Solution distributed(route,0);
+        distributed.CalcLength();
+        solutions.push_back(distributed);
+        cout<<"d "<<d<<endl;
     }
 }
 
@@ -308,6 +366,7 @@ void massExtinction()
             extinct.push_back(solutions[0]);
             solutions.clear();
             random();
+            random2();
             best_of_generation=queue<Solution>();//clears the queue
         }
         else
@@ -396,32 +455,6 @@ void MST()
     solutions.push_back(res);
 }
 
-void LK()
-{
-    ;
-}
-
-struct triple{
-    int vertex;
-    int trial;
-    double gain;
-};
-/*void shittyLinKernighan(Solution curr)
-{
-    int best_cost = curr.sum;
-    while(true) {
-        // find the longest edge in the current solution
-        // reverse the order of the cities that it connects
-        // repeat reversing sub-tour until no improvement
-        int new_cost = calculateCost(current_solution, distances);
-        if (new_cost >= best_cost) {
-            break;
-        }
-        best_cost = new_cost;
-    }
-}*/
-
-
 int main()
 {
     ios_base::sync_with_stdio(0);
@@ -435,9 +468,10 @@ int main()
         path.push_back(i);
     }
     random();
+    random2();
     prepareCross();
     //findGreedy();
-    MST();
+    //MST();
     sort(solutions.begin(),solutions.end());
     bool added=false;
     for(int k=0; k<ITERATIONS1; k++)
