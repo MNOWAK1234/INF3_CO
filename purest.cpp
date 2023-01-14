@@ -9,11 +9,11 @@
 
 using namespace std;
 
-#define CROSSES 2500
-#define POPULATION 5000
-#define BEST 5000
+#define CROSSES 10000
+#define POPULATION 10000
+#define BEST 2500
 #define STABLE 400
-#define ITERATIONS1 4001
+#define ITERATIONS1 3001
 #define ITERATIONS2 1001
 
 int  n;
@@ -29,20 +29,6 @@ vector <int> mst;
 vector <vector<int> >tree;
 
 int cnt=0;
-
-void show_matrix(vector<vector<double> >v)
-{
-    for(int i=0; i<(int)v.size(); i++)
-    {
-        cout<<i<<": "<<endl;
-        for(int j=0; j<(int)v[i].size(); j++)
-        {
-            cout<<v[i][j]<<"\t";
-        }
-        cout<<endl;
-    }
-}
-
 
 class Solution
 {
@@ -63,11 +49,6 @@ class Solution
         void display()
         {
             cout<<sum<<endl;
-            /*for(int i=0; i<n; i++)
-            {
-                cout<<this->points[i]<<"\t"<<coordinates[this->points[i]-1].first<<"\t"<<coordinates[this->points[i]-1].second<<endl;
-            }
-            cout<<endl;*/
         }
         void CalcLength()
         {
@@ -134,6 +115,7 @@ vector<vector<double> >lss_points(vector<pair<double, double> > points)//return 
     }
     return distances;
 }
+
 void random()
 {
     for(int i = 0; i < POPULATION-100; i++)
@@ -167,10 +149,8 @@ void random2()
         for(int k=0; k<n; k++)sumofdist+=distances[j][k];
         evaluate.push_back(sumofdist);
     }
-    //for(int i=0; i<n; i++)cout<<i+1<<": "<<evaluate[i]<<endl;
     for(int i = 0; i < 100; i++)//POPULATION
     {
-        //if(i%50==0)cout<<i<<endl;
         int d=0;
         for(int j=0; j<n; j++)visited[j]=false;
         int current=rand()%n;
@@ -179,7 +159,6 @@ void random2()
         route.push_back(current+1);
         for(int j=1; j<n; j++)//EVERY STEP
         {
-            //cout<<j<<" "<<current+1<<endl;
             valueandindex.clear();
             for(int k=0; k<n; k++)
             {
@@ -202,7 +181,6 @@ void random2()
         Solution distributed(route,0);
         distributed.CalcLength();
         solutions.push_back(distributed);
-        cout<<"d "<<d<<endl;
     }
 }
 
@@ -405,54 +383,7 @@ Solution findGreedy()
     sum+=distances[currentpoint][0];
     Solution res(greedyPoints,sum);
     solutions.push_back(res);
-}
-
-void DFS(int curr)
-{
-    for(int i=0; i<tree[curr].size(); i++)
-    {
-        if(visited1[tree[curr][i]]==0)
-        {
-            visited1[tree[curr][i]]=1;
-            mst.push_back(tree[curr][i]+1);
-            DFS(tree[curr][i]);
-        }
-    }
-}
-
-void MST()
-{
-    vector<bool>visited;
-    vector<int>tmp;
-    double sum=0;
-    for(int i=0; i<n; i++)
-    {
-        visited.push_back(false);
-        tree.push_back(tmp);
-    }
-    int current=0;
-    priority_queue<pair<double,pair<int,int> >, vector<pair<double,pair<int,int> > >, greater<pair<double,pair<int,int> > > >pq;
-    for(int i=1; i<n; i++)
-    {
-        visited[current]=true;
-        for(int j=0; j<n; j++)
-        {
-            if(visited[j]==false)pq.push(make_pair(distances[current][j],make_pair(current,j)));
-        }
-        while(visited[pq.top().second.second]==true)pq.pop();
-        current=pq.top().second.second;
-        tree[pq.top().second.first].push_back(pq.top().second.second);
-        tree[pq.top().second.second].push_back(pq.top().second.first);
-        pq.pop();
-    }
-    for(int i=0; i<n; i++)visited1[i]=0;
-    visited1[0]=1;
-    mst.push_back(1);
-    DFS(0);
-    for(int i=1; i<n; i++)sum+=distances[mst[i]-1][mst[i-1]-1];
-    sum+=distances[mst[0]][mst[n-1]];
-    Solution res(mst,sum);
-    solutions.push_back(res);
+    return res;
 }
 
 int main()
@@ -463,45 +394,26 @@ int main()
     cin>>n;
     coordinates=readInput(n);
     distances=lss_points(coordinates); //adjacency matrix
-    for(int i=1; i<=n; i++)
-    {
-        path.push_back(i);
-    }
+    for(int i=1; i<=n; i++) path.push_back(i);
     random();
     random2();
     prepareCross();
-    //findGreedy();
-    //MST();
     sort(solutions.begin(),solutions.end());
     bool added=false;
     for(int k=0; k<ITERATIONS1; k++)
     {
-        //if(k%50==0)
+        if(k%200==0)
         {
             cout<<k<<endl;
             solutions[0].display();
-            //solutions[100].display();
         }
-        int cnt=0;
         for(int i=1; i<solutions.size(); i++)
         {
-            if(solutions[i-1].sum==solutions[i].sum)
-            {
-                mutation(i);
-                cnt++;
-            }
+            if(solutions[i-1].sum==solutions[i].sum) mutation(i);
         }
-        cout<<"tyle mutuje "<<cnt<<endl;
         orderCross();
-        if(solutions[0].sum>200000 && added==false)
-        {
-            //findGreedy();
-            cout<<"added greedy"<<endl;
-            added=true;
-        }
         sort(solutions.begin(),solutions.end());
         solutions.erase(solutions.begin()+POPULATION,solutions.end());
-        //solutions.resize(POPULATION);
         massExtinction();
     }
     cout<<"Extinct:"<<endl; //adding best results to population
@@ -515,25 +427,25 @@ int main()
 
     for(int k=0; k<ITERATIONS2; k++)
     {
-        if(k%50==0)
+        if(k%100==0)
         {
             cout<<k<<endl;
             solutions[0].display();
-            //solutions[100].display();
         }
-        int cnt=0;
         for(int i=1; i<solutions.size(); i++)
         {
-            if(solutions[i-1].sum==solutions[i].sum)
-            {
-                mutation(i);
-                cnt++;
-            }
+            if(solutions[i-1].sum==solutions[i].sum) mutation(i);
         }
-        //cout<<"tyle mutuje "<<cnt<<endl;
         orderCross();
         sort(solutions.begin(),solutions.end());
         solutions.erase(solutions.begin()+POPULATION,solutions.end());
-        //solutions.resize(POPULATION);
     }
+
+    cout<<"Final:"<<endl;
+    cout<<solutions[0].sum<<endl;
+    //for(int i=0; i<n; i++) cout<<solutions[0].points[i]<<" - ";
+
+    cout<<"Greedy:"<<endl;
+    Solution greedy = findGreedy();
+    cout<<greedy.sum<<endl;
 }

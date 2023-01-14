@@ -3,17 +3,24 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <fstream>
 
 using namespace std;
 
 int main()
 {
     srand(time(0));
-    int n=10;
-    for(int i=0; i<n; i++)
+
+    ofstream zapis;
+    zapis.open("test.txt");
+
+    int n=100;
+    zapis<<n<<endl;
+    for(int i=1; i<=n; i++)
     {
-        cout<<rand()%100+0<<" ";
-        cout<<rand()%100+0<<endl;
+        zapis<<i<<" ";
+        zapis<<rand()%100000+0<<" ";
+        zapis<<rand()%100000+0<<endl;
     }
 }
 
