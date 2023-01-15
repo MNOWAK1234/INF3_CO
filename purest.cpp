@@ -9,12 +9,12 @@
 
 using namespace std;
 
-#define CROSSES 10000
-#define POPULATION 10000
-#define BEST 2500
+#define CROSSES 2500
+#define POPULATION 5000
+#define BEST 5000
 #define STABLE 400
-#define ITERATIONS1 3001
-#define ITERATIONS2 1001
+#define ITERATIONS1 3000
+#define ITERATIONS2 1000
 
 int  n;
 
@@ -229,6 +229,7 @@ void mutation(int which)
         a=rand()%solutions[which].points.size();
         solutions[which].points.insert(solutions[which].points.begin()+a, change.begin(), change.end());
     }
+    solutions[which].CalcLength();
 }
 
 void orderCross()
@@ -394,20 +395,21 @@ int main()
     cin>>n;
     coordinates=readInput(n);
     distances=lss_points(coordinates); //adjacency matrix
+
     for(int i=1; i<=n; i++) path.push_back(i);
     random();
     random2();
     prepareCross();
     sort(solutions.begin(),solutions.end());
-    bool added=false;
+    
     for(int k=0; k<ITERATIONS1; k++)
     {
-        if(k%200==0)
+        if(k%200==0 || k==1)
         {
             cout<<k<<endl;
             solutions[0].display();
         }
-        for(int i=1; i<solutions.size(); i++)
+        for(int i=solutions.size()-1; i>=1; i--)
         {
             if(solutions[i-1].sum==solutions[i].sum) mutation(i);
         }
@@ -432,7 +434,7 @@ int main()
             cout<<k<<endl;
             solutions[0].display();
         }
-        for(int i=1; i<solutions.size(); i++)
+        for(int i=solutions.size()-1; i>=1; i--)
         {
             if(solutions[i-1].sum==solutions[i].sum) mutation(i);
         }
@@ -443,7 +445,8 @@ int main()
 
     cout<<"Final:"<<endl;
     cout<<solutions[0].sum<<endl;
-    //for(int i=0; i<n; i++) cout<<solutions[0].points[i]<<" - ";
+    for(int i=0; i<n; i++) cout<<solutions[0].points[i]<<" - ";
+    cout<<endl;
 
     cout<<"Greedy:"<<endl;
     Solution greedy = findGreedy();

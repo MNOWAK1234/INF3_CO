@@ -14,13 +14,13 @@ int main()
     ofstream zapis;
     zapis.open("test.txt");
 
-    int n=100;
+    int n=10;
     zapis<<n<<endl;
     for(int i=1; i<=n; i++)
     {
         zapis<<i<<" ";
-        zapis<<rand()%100000+0<<" ";
-        zapis<<rand()%100000+0<<endl;
+        zapis<<rand()%20+0<<" ";
+        zapis<<rand()%20+0<<endl;
     }
 }
 
