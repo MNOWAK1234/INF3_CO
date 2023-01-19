@@ -13,7 +13,7 @@ using namespace std;
 #define POPULATION 5000
 #define BEST 5000
 #define STABLE 400
-#define ITERATIONS1 3000
+#define ITERATIONS1 4000
 #define ITERATIONS2 1000
 
 int  n;
