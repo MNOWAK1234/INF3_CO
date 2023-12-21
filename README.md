@@ -1,4 +1,4 @@
-# Combinatorial optimization term 3 Poznan University of Technology
+# Combinatorial Optimization classes term 3 Poznan University of Technology
 * Project: Optimizing the Travelling Salesman Problem through Genetic Algorithm
 * Report outlining our method (in Polish)
 
