@@ -1,7 +1,5 @@
-# Combinatorial-Optimization
-
-This is a combinatorial optimization project for academic studies.
-
-The aim of this project is to find a solution to the Travelling Salesman Problem using a metaheuristic approach.
+# Combinatorial optimization term 3 Poznan University of Technology
+* Project: Optimization of Travelling Salesman Problem using a genetic algorithm. <br/><br/>
+* Project: Report regarding our method (in Polish) <br/><br/>
 
 Authors: A. Roszkiewicz, M. Nowak
